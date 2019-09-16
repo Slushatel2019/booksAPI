@@ -19,18 +19,18 @@ class Books
     {
         $query = "SELECT * FROM book";
         $resQuery = $this->link->query($query);
-        echo (json_encode($resQuery->fetchAll(PDO::FETCH_ASSOC)));
+        echo json_encode($resQuery->fetchAll(PDO::FETCH_ASSOC));
     }
     public function booksId($id)
     {
         $query = "SELECT * FROM book WHERE id = $id";
         $resQuery = $this->link->query($query);
-        echo json_encode($resQuery->fetch(PDO::FETCH_ASSOC));
+        echo json_encode($resQuery->fetch());
     }
     public function count()
     {
-        $query = "SELECT * FROM book";
+        $query = "SELECT COUNT('id') FROM book";
         $resQuery = $this->link->query($query);
-        echo $resQuery->rowCount();
+        echo $resQuery->fetch();
     }
 }
