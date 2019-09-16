@@ -1,5 +1,5 @@
 <?php
-require_once('books.php');
+require_once('Books.php');
 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
     Books::getInstance()->allBooks();
 }
