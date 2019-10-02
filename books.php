@@ -15,16 +15,14 @@ class Books
         }
         return self::$instance;
     }
-    public function auth($login,$password)
+    public function auth($login, $password)
     {
         $stmt = $this->link->prepare("SELECT id FROM users WHERE login = :login AND password = :password");
         $stmt->execute([':login' => $login, ':password' => $password]);
-        
-        if ( $stmt->rowCount() > 0)
-        {
+        if ($stmt->rowCount() > 0) {
             return true;
         }
-            return false;
+        return false;
     }
     public function allBooks()
     {
