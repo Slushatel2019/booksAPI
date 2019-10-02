@@ -17,14 +17,13 @@ class Books
     }
     public function auth($login,$password)
     {
-        $loginPasswordCheck = "SELECT login,password FROM users";
-        $resLoginPasswordCheck = $this->link->query($loginPasswordCheck);
-        while ($row=$resLoginPasswordCheck->fetch(PDO::FETCH_ASSOC))
+        $stmt = $this->link->prepare("SELECT id FROM users WHERE login = :login AND password = :password");
+        $stmt->execute([':login' => $login, ':password' => $password]);
+        
+        if ( $stmt->rowCount() > 0)
         {
-        if ($login===$row['login'] and $password===$row['password']) {
             return true;
         }
-        }   
             return false;
     }
     public function allBooks()
