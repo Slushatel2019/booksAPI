@@ -15,6 +15,18 @@ class Books
         }
         return self::$instance;
     }
+    public function auth($login,$password)
+    {
+        $loginPasswordCheck = "SELECT login,password FROM users";
+        $resLoginPasswordCheck = $this->link->query($loginPasswordCheck);
+        while ($row=$resLoginPasswordCheck->fetch(PDO::FETCH_ASSOC))
+        {
+        if ($login===$row['login'] and $password===$row['password']) {
+            return true;
+        }
+        }   
+            return false;
+    }
     public function allBooks()
     {
         $query = "SELECT * FROM book";
