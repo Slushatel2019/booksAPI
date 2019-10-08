@@ -1,20 +1,22 @@
 <?php
 require_once('Books.php');
-function get($value, $default = null)
-{
+function get($value, $default = null) {
     return isset($value) ? $value : $default;
 }
+
 $user = get($_SERVER['PHP_AUTH_USER'], false);
 $pass = get($_SERVER['PHP_AUTH_PW'], false);
 if (!$user or !$pass) {
     header('WWW-Authenticate: Basic realm');
     exit('incorrect login or password');
 }
+
 $login = Books::getInstance()->auth($user, $pass);
 if (!$login) {
     header('WWW-Authenticate: Basic realm');
     exit('incorrect login or password');
 }
+
 switch ($_SERVER['REQUEST_METHOD']) {
     case "GET":
         if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
@@ -37,21 +39,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
     case "POST":
         if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
             $postdata = file_get_contents("php://input");
-            try {
-                $array = json_decode($postdata, true);
+            $array = json_decode($postdata, true);
+            if (is_null($array) or !is_array($array)) {
+                Books::getInstance()->response(['message' => 'Incorrect input data', 'data' => $postdata]);
             }
-                catch (Exception $e) { 
-                    echo 'hello';
-                }
             var_dump($array);
-            if (is_array($array)) {
-                $result = Books::getInstance()->add($array);
-                Books::getInstance()->response($result);
-                exit;
+
+            if (!is_array($array[0])) {
+                $array = [$array];
             }
+            $results = [];
+            foreach ($array as $book) {
+                $result = Books::getInstance()->add($book);
+                $results += $result;
+            }
+            Books::getInstance()->response($results);
         }
-        exit('incorrect URL');
-        break;
+        Books::getInstance()->response(['message' => 'incorrect URL']);
     case "PUT":
         $postdata = file_get_contents("php://input");
         $array = json_decode($postdata, true);

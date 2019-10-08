@@ -1,22 +1,23 @@
 <?php
-class Books
-{
+
+class Books {
     private static $instance = null;
-    private function __construct()
-    {
+
+    private function __construct() {
         $this->link = new PDO('mysql: host=localhost;dbname=library_bd', "root", "root");
     }
-    private function __clone()
-    { }
-    public static function getInstance()
-    {
+
+    private function __clone() {
+    }
+
+    public static function getInstance() {
         if (self::$instance === null) {
             self::$instance = new Books;
         }
         return self::$instance;
     }
-    public function auth($login, $password)
-    {
+
+    public function auth($login, $password) {
         $stmt = $this->link->prepare("SELECT id FROM users WHERE 
         BINARY login = :login AND BINARY password = :password");
         $stmt->execute([':login' => $login, ':password' => $password]);
@@ -25,31 +26,31 @@ class Books
         }
         return false;
     }
-    public function add($data)
-    {
-        $i = 0;
-        $id = [];
-        $arrayTable = ['name' => 0, 'genre' => 0, 'pages' => 0];
-        if ((count($data, COUNT_RECURSIVE) - count($data)) > 0) {
-            foreach ($data as $key => $array1) {
-                var_dump(implode("','", array_intersect_key($array1, $arrayTable)));
-                $stmt = $this->link->prepare("INSERT INTO `book`(`name`, `genre`, `pages`) VALUES
-                (" . "'" . implode("','", array_intersect_key($array1, $arrayTable)) . "'" . ")");
-                $stmt->execute();
-                $i = $stmt->rowCount() + $i;
-                $id[$i]['id'] = $this->link->lastInsertId();
-            }
-            return ['data' => $id, 'message' => $i . ' added books', 'status' => 200];
+
+    public function add($data) {
+        // необходимые ключи для таблицы
+        $arrayTable = array_flip(['name', 'genre', 'pages']);
+        // оставляем только необходимые ключи
+        $book = array_intersect_key($data, $arrayTable);
+        // если ключей меньше, чем нужно - возвращаем ошибку
+        if (count($book) != count($arrayTable)) {
+            return ['data' => $data, 'message' => 'Needed fields are ' . (string)$data, 'status' => 500];
         }
-        $stmt = $this->link->prepare("INSERT INTO `book`(`name`, `genre`, `pages`) VALUES
-        (" . "'" . implode("','", array_intersect_key($data, $arrayTable)) . "'" . ")");
+        $stmt = $this->link->prepare(
+            "INSERT INTO `book`(`name`, `genre`, `pages`) 
+                        VALUES (:name, :genre, :pages);"
+        );
+        $stmt->bindParam(":name", $book['name'], PDO::PARAM_STR);
+        $stmt->bindParam(":genre", $book['genre'], PDO::PARAM_STR);
+        $stmt->bindParam(":pages", $book['pages'], PDO::PARAM_INT);
         $stmt->execute();
-        $id =  $this->link->lastInsertId();
         $i = $stmt->rowCount();
-        return ['data' => 'id=' . $id, 'message' => $i . ' added book ', 'status' => 200];
+        $id = $this->link->lastInsertId();
+
+        return ['data' => ['id' => $id], 'message' => $i . ' added books', 'status' => 200];
     }
-    public function update($data, $id = null)
-    {
+
+    public function update($data, $id = null) {
         if ($id == null) {
             if ((count($data, COUNT_RECURSIVE) - count($data)) > 0) {
                 $arrayTable = ['id' => 0, 'name' => 0, 'genre' => 0, 'pages' => 0];
@@ -97,37 +98,37 @@ class Books
             return ['data' => $changes, 'message' => $i . ' changed books', 'status' => 200];
         }
     }
-    public function del($id)
-    {
+
+    public function del($id) {
         $stmt = $this->link->prepare("DELETE FROM `book` WHERE id=" . $id);
         $b = $stmt->execute();
         var_dump($b);
         $i = 0;
         $i = $stmt->rowCount() + $i;
-        return ['data' => 'id=' . $id, 'message' => $i . ' book is deleted', 'status' => 200];;
+        return ['data' => 'id=' . $id, 'message' => $i . ' book is deleted', 'status' => 200];
     }
-    public function allBooks()
-    {
+
+    public function allBooks() {
         $query = "SELECT * FROM book";
         $resQuery = $this->link->query($query);
         $data = $resQuery->fetchAll(PDO::FETCH_ASSOC);
         return ['data' => $data, 'message' => 'all books', 'status' => 200];
     }
-    public function booksId($id)
-    {
+
+    public function booksId($id) {
         $query = "SELECT * FROM book WHERE id = $id";
         $resQuery = $this->link->query($query);
         $data = $resQuery->fetch(PDO::FETCH_ASSOC);
         return ['data' => $data, 'message' => 'book', 'status' => 200];
     }
-    public function count()
-    {
+
+    public function count() {
         $query = "SELECT COUNT(*) FROM book";
         $resQuery = $this->link->query($query);
         return ['data' => $resQuery->fetchColumn(), 'message' => 'count of books', 'status' => 200];
     }
-    public function response($input)
-    {
+
+    public function response($input) {
         $resp = ['data' => $input['data'], 'message' => $input['message'], 'status' => $input['status']];
         echo json_encode($resp);
         exit;
