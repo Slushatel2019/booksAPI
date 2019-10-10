@@ -1,87 +1,93 @@
 <?php
 require_once('Books.php');
-function get($value, $default = null) {
-    return isset($value) ? $value : $default;
-}
+require_once('Common.php');
 
 $user = get($_SERVER['PHP_AUTH_USER'], false);
 $pass = get($_SERVER['PHP_AUTH_PW'], false);
 if (!$user or !$pass) {
     header('WWW-Authenticate: Basic realm');
-    exit('incorrect login or password');
+    response(['data' => 'error', 'message' =>
+    'incorrect login or password', 'status' => 403]);
 }
-
-$login = Books::getInstance()->auth($user, $pass);
+$login = auth($user, $pass);
 if (!$login) {
     header('WWW-Authenticate: Basic realm');
-    exit('incorrect login or password');
+    response(['data' => 'error', 'message' => 'incorrect login or password', 'status' => 403]);
 }
-
 switch ($_SERVER['REQUEST_METHOD']) {
     case "GET":
         if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-            $result = Books::getInstance()->allBooks();
-            Books::getInstance()->response($result);
-            exit;
+            $result = allBooks();
+            response($result);
         }
         if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
             preg_match("/[0-9]{1,}/", $_SERVER['REQUEST_URI'], $matches);
-            $result = Books::getInstance()->booksId($matches[0]);
-            Books::getInstance()->response($result);
-            exit;
+            $result = booksId($matches[0]);
+            response($result);
         }
         if (preg_match("[^/api/books/count(|/)$]", $_SERVER['REQUEST_URI'])) {
-            $result = Books::getInstance()->count();
-            Books::getInstance()->response($result);
-            exit;
+            $result = counts();
+            response($result);
         }
-        break;
+        response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
     case "POST":
         if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
             $postdata = file_get_contents("php://input");
             $array = json_decode($postdata, true);
             if (is_null($array) or !is_array($array)) {
-                Books::getInstance()->response(['message' => 'Incorrect input data', 'data' => $postdata]);
+                response(['message' => 'Incorrect input data', 'data' => $postdata, 'status' => 200]);
             }
-            var_dump($array);
-
+            #error_reporting(0);
             if (!is_array($array[0])) {
                 $array = [$array];
             }
-            $results = [];
+            $res = [];
             foreach ($array as $book) {
-                $result = Books::getInstance()->add($book);
-                $results += $result;
+                $result = add($book);
+                array_push($res, $result);
             }
-            Books::getInstance()->response($results);
+            response($res);
         }
-        Books::getInstance()->response(['message' => 'incorrect URL']);
+        response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
     case "PUT":
         $postdata = file_get_contents("php://input");
         $array = json_decode($postdata, true);
-        $array = is_array($array) ? $array : exit('data format is not an array');
+        if (is_null($array) or !is_array($array)) {
+            response(['message' => 'Incorrect input data', 'data' => $postdata, 'status' => 200]);
+        }
         if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-            $result = Books::getInstance()->update($array);
-            Books::getInstance()->response($result);
-            exit;
+            if (!is_array($array[0])) {
+                $array = [$array];
+            }
+            $res = [];
+            foreach ($array as $book) {
+                $id = $book['id'];
+                unset($book['id']);
+                $result = update($book, $id);
+                array_push($res, $result);
+            }
+            response($res);
         }
         if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
             preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
             $id = implode($matches[0]);
-            $result = Books::getInstance()->update($array, $id);
-            Books::getInstance()->response($result);
-            exit;
+            if (!is_array($array[0])) {
+                $array = [$array];
+            }
+            $res = [];
+            foreach ($array as $book) {
+                $result = update($book, $id);
+                array_push($res, $result);
+            }
+            response($res);
         }
-        exit('incorrect URL');
-        break;
+        response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
     case "DELETE":
         if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
             preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
             $id = implode($matches[0]);
-            $result = Books::getInstance()->del($id);
-            Books::getInstance()->response($result);
-            exit;
+            $result = del($id);
+            response($result);
         }
-        echo "incorrect url for delete";
-        break;
+        response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
 }
