@@ -3,7 +3,7 @@ class DB
 {
     private static $instance = null;
 
-    public function __construct()
+    private function __construct()
     {
         $this->link = new PDO('mysql: host=localhost;dbname=library_bd', "root", "root");
     }
