@@ -1,7 +1,6 @@
 <?php
-require_once('Books.php');
+require_once('DB.php');
 require_once('Common.php');
-
 $user = get($_SERVER['PHP_AUTH_USER'], false);
 $pass = get($_SERVER['PHP_AUTH_PW'], false);
 if (!$user or !$pass) {
@@ -9,7 +8,7 @@ if (!$user or !$pass) {
     response(['data' => 'error', 'message' =>
     'incorrect login or password', 'status' => 403]);
 }
-$login = auth($user, $pass);
+$login = DB::getInstance()->auth($user, $pass);
 if (!$login) {
     header('WWW-Authenticate: Basic realm');
     response(['data' => 'error', 'message' => 'incorrect login or password', 'status' => 403]);
@@ -17,16 +16,16 @@ if (!$login) {
 switch ($_SERVER['REQUEST_METHOD']) {
     case "GET":
         if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-            $result = allBooks();
+            $result = DB::getInstance()->allBooks();
             response($result);
         }
         if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
             preg_match("/[0-9]{1,}/", $_SERVER['REQUEST_URI'], $matches);
-            $result = booksId($matches[0]);
+            $result = DB::getInstance()->booksId($matches[0]);
             response($result);
         }
         if (preg_match("[^/api/books/count(|/)$]", $_SERVER['REQUEST_URI'])) {
-            $result = counts();
+            $result = DB::getInstance()->count();
             response($result);
         }
         response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
@@ -43,8 +42,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
             }
             $res = [];
             foreach ($array as $book) {
-                $result = add($book);
-                array_push($res, $result);
+                $result = DB::getInstance()->add($book);
+                $res = array_merge_recursive($res, $result);
             }
             response($res);
         }
@@ -59,34 +58,36 @@ switch ($_SERVER['REQUEST_METHOD']) {
             if (!is_array($array[0])) {
                 $array = [$array];
             }
+            $responseFalseId = [];
             $res = [];
             foreach ($array as $book) {
+                if (!is_integer($book['id']) or is_null($book['id'])) {
+                    $response = ['message' => 'no id, no changes', 'data' => $book, 'status' => 200];
+                    $responseFalseId = array_merge_recursive($responseFalseId, $response);
+                    continue;
+                }
                 $id = $book['id'];
-                unset($book['id']);
-                $result = update($book, $id);
-                array_push($res, $result);
+                $result = DB::getInstance()->update($book, $id);
+                $res = array_merge_recursive($res, $result);
             }
-            response($res);
+            $finishResponseArray = array_merge_recursive($res, $responseFalseId);
+            response($finishResponseArray);
         }
         if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
-            preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
-            $id = implode($matches[0]);
-            if (!is_array($array[0])) {
-                $array = [$array];
+            if (is_array($array[0])) {
+                response(['message' => 'Incorrect input data', 'data' => $array, 'status' => 200]);
             }
-            $res = [];
-            foreach ($array as $book) {
-                $result = update($book, $id);
-                array_push($res, $result);
-            }
-            response($res);
+            preg_match('/[0-9]+/', $_SERVER['REQUEST_URI'], $matches);
+            $id = implode($matches);
+            $result = DB::getInstance()->update($array, $id);
+            response($result);
         }
         response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
     case "DELETE":
         if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
             preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
             $id = implode($matches[0]);
-            $result = del($id);
+            $result = DB::getInstance()->del($id);
             response($result);
         }
         response(['message' => 'incorrect URL', 'data' => 'error', 'status' => 404]);
