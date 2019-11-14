@@ -1,0 +1,4 @@
+   RewriteEngine on 
+   RewriteRule "^/api(.*)$" api.php [L]
+   RewriteRule "bookshop.com" index.html
+   
