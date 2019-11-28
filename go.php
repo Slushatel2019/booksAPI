@@ -11,7 +11,7 @@ curl_setopt($curl, CURLOPT_URL, $url);
 #curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($curl, CURLOPT_HEADER, false);
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, false); // return to browser(0) or not(1)
-curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
 curl_setopt($curl, CURLOPT_POSTFIELDS, $data1);
 curl_setopt($curl, CURLOPT_USERPWD, 'andrew:123');
 curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
