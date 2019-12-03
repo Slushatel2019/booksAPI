@@ -16,20 +16,20 @@ class Common
         echo json_encode($input);
         exit;
     }
-    public static function check($book)
+    public static function checkBook($book)
     {
         $name = true;
         if (isset($book['name'])) {
             $name = preg_match("/^([A-Za-z]+[\s]?[A-Za-z]+)+$/", $book['name']);
         }
-        $genre=true;
+        $genre = true;
         if (isset($book['genre'])) {
             $genre = preg_match("/^([A-Za-z]+[\s]?[A-Za-z]+)+$/", $book['genre']);
         }
-        $pages=false;
+        $pages = true;
         if (isset($book['pages'])) {
-            $pages = preg_match("/\D/", $book['pages']);
+            $pages = preg_match_all("/^[0-9]*$/", $book['pages']);
         }
-        return (($name == true) && ($genre == true) && ($pages == false)) ? true : false;
+        return ($name && $genre && $pages) ? true : false;
     }
 }

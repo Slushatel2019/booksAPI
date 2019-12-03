@@ -21,42 +21,44 @@ class DB
         }
         return self::$instance;
     }
-    public function executeUpdate($query, $book)
+
+    private function execute($query, $params)
     {
         $stmt = $this->link->prepare($query);
-        foreach ($book as $key => $value) {
-            if ($key === 'pages') {
-                $stmt->bindValue(":$key", $value, \PDO::PARAM_INT);
-            } else {
-                $stmt->bindValue(":$key", $value, \PDO::PARAM_STR);
+        if ($params) {
+            foreach ($params as $param) {
+                $stmt->bindValue($param['key'], $param['value'], $param['type']);
             }
         }
         $stmt->execute();
-        return $stmt->rowCount();
+        return $stmt;
     }
-    public function executeAdd($query, $book)
+    private function executeUpsert($query, $params)
     {
-        $stmt = $this->link->prepare($query);
-        $stmt->bindParam(":name", $book['name'], \PDO::PARAM_STR);
-        $stmt->bindParam(":genre", $book['genre'], \PDO::PARAM_STR);
-        $stmt->bindParam(":pages", $book['pages'], \PDO::PARAM_INT);
-        $stmt->execute();
-        $result['successfulAdd'] = $stmt->rowCount();
-        $result['id'] = $this->link->lastInsertId();
+        $stmt = $this->execute($query, $params);
+        $result['rowCount'] = $stmt->rowCount();
+        $result['lastInsertId'] = $this->link->lastInsertId();
         return $result;
     }
-    public function executeAuth($query, $user)
+    public function executeUpdate($query, $params)
     {
-        $stmt = $this->link->prepare($query);
-        $stmt->bindParam(':login', $user['login'], \PDO::PARAM_STR_CHAR);
-        $stmt->bindParam(':password', $user['password'],  \PDO::PARAM_STR_CHAR);
-        $stmt->execute();
-        return $stmt->rowCount();
+        return $this->executeUpsert($query, $params);
     }
-    public function executeCommon($query, $param)
+    public function executeInsert($query, $params)
     {
-        $stmt = $this->link->prepare($query);
-        $stmt->execute();
+        return $this->executeUpsert($query, $params);
+    }
+    public function executeDelete($query, $params)
+    {
+        return $this->executeUpsert($query, $params);
+    }
+    public function executeAuth($query, $params)
+    {
+        return $this->executeUpsert($query, $params);
+    }
+    public function executeSelect($query, $param)
+    {
+        $stmt = $this->execute($query, false);
         switch ($param) {
             case 'rowCount':
                 return $stmt->rowCount();
