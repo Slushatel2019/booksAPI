@@ -11,8 +11,6 @@ use Monolog\Handler\StreamHandler;
 date_default_timezone_set('Europe/Kiev');
 $log = new Logger('main_site_app');
 $log->pushHandler(new StreamHandler('logs/main.log', Logger::INFO));
-
-
 $signIn = new Auth($log);
 if ($signIn->checkUserLoginPassword()) {
   $user = $_SERVER['PHP_AUTH_USER'];
