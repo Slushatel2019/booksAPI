@@ -1,4 +1,4 @@
 /.idea/
 vendor/
-site/logs/
+logs/
 composer.lock
