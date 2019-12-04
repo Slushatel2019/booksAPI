@@ -31,19 +31,19 @@ class Books
                 $result = $this->addBook($book);
                 $res = array_merge_recursive($res, $result);
             } else {
-                return Common::response(['message' => 'Incorrect input data', 'data' => $book, 'status' => 200]);
+                $res = array_merge_recursive($res, ['message' => 'Incorrect input data', 'data' => $book, 'status' => 200]);
             }
         }
-        return Common::response($res);
+        return $res;
     }
-    function addBook($data)
+    private function addBook($data)
     {
         $arrayTable = array_flip(['name', 'genre', 'pages']);
         $book = array_intersect_key($data, $arrayTable);
-        $dif = array_diff_key($arrayTable, $book);
+        $diff = array_diff_key($arrayTable, $book);
         if (count($book) != count($arrayTable)) {
             return ['data' => $data, 'message' => 'Needed fields are ' .
-                implode(',', array_keys($dif)), 'status' => 500];
+                implode(',', array_keys($diff)), 'status' => 500];
         }
         $query = 'INSERT INTO `book` (`name`, `genre`, `pages`) 
         VALUES (:name, :genre, :pages)';
@@ -70,7 +70,7 @@ class Books
             $res = array_merge_recursive($res, $result);
         }
         $finishResponseArray = array_merge_recursive($res, $responseFalseId);
-        Common::response($finishResponseArray);
+        return $finishResponseArray;
     }
     public function updateBookByUriId($array)
     {
@@ -78,23 +78,22 @@ class Books
             preg_match('/[0-9]+/', $_SERVER['REQUEST_URI'], $matches);
             $id = implode($matches);
             $result = $this->internalFunctionUpdateBook($array, $id);
-            Common::response($result);
+            return $result;
         } else {
-            Common::response(['message' => 'Incorrect input data', 'data' => $array, 'status' => 200]);
+            return ['message' => 'Incorrect input data', 'data' => $array, 'status' => 200];
         }
     }
-    public function internalFunctionUpdateBook($data, $id)
+    private function internalFunctionUpdateBook($data, $id)
     {
         $arrayTable = array_flip(['name', 'genre', 'pages']);
         $book = array_intersect_key($data, $arrayTable);
         $setArr = [];
         $params = [];
+        $type = ['int' => \PDO::PARAM_INT, 'str' => \PDO::PARAM_STR_CHAR];
         foreach ($book as $key => $value) {
             $setArr[] = "$key=:$key";
-            if ($key === 'pages') {
-                array_push($params, ['key' => $key, 'value' => $value, 'type' => \PDO::PARAM_INT]);
-            }
-            array_push($params, ['key' => $key, 'value' => $value, 'type' => \PDO::PARAM_STR_CHAR]);
+            $type = $key === 'pages' ? \PDO::PARAM_INT : \PDO::PARAM_STR_CHAR;
+            array_push($params, ['key' => $key, 'value' => $value, 'type' => $type]);
         }
         $set = implode(',', $setArr);
         $query = "UPDATE `book` SET  $set  WHERE `id`=:id";
