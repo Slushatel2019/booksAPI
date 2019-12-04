@@ -32,11 +32,11 @@ class Auth
             ['key' => ':login', 'value' => $user['login'], 'type' => \PDO::PARAM_STR_CHAR],
             ['key' => ':password', 'value' => $user['password'], 'type' => \PDO::PARAM_STR_CHAR]
         ];
-        if ($this->db->executeAuth($query, $params)['rowCount'] === 0) {
+        if ($this->db->executeSelect($query, 'rowCount', $params) === 0) {
             $force = true;
             $this->getUserLoginPassword($force);
         }
-        $result = $this->db->executeAuth($query, $params);
-        return ($result['rowCount'] === 1) ? true : false;
+        $result = $this->db->executeSelect($query, 'rowCount', $params);
+        return ($result === 1) ? true : false;
     }
 }

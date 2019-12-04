@@ -52,13 +52,13 @@ class DB
     {
         return $this->executeUpsert($query, $params);
     }
-    public function executeAuth($query, $params)
+    public function executeSelect($query, $param, $params = false)
     {
-        return $this->executeUpsert($query, $params);
-    }
-    public function executeSelect($query, $param)
-    {
-        $stmt = $this->execute($query, false);
+        if ($params) {
+            $stmt = $this->execute($query, $params);
+        } else {
+            $stmt = $this->execute($query, false);
+        }
         switch ($param) {
             case 'rowCount':
                 return $stmt->rowCount();

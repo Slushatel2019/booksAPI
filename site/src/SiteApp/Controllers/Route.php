@@ -14,7 +14,7 @@ class Route
     {
         $this->log = $loger;
         $this->user = $user;
-        $this->modal = new Books($this->log);
+        $this->model = new Books($this->log);
     }
 
     public function run()
@@ -23,44 +23,47 @@ class Route
             case "GET":
                 $this->log->info('username= ' . $this->user, array('Method' => 'GET', 'inputUri' => $_SERVER['REQUEST_URI']));
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $result = $this->modal->getAllBooks();
+                    $result = $this->model->getAllBooks();
                     Common::response($result);
                 }
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
                     preg_match("/[0-9]{1,}/", $_SERVER['REQUEST_URI'], $matches);
-                    $result = $this->modal->getBooksById($matches[0]);
+                    $result = $this->model->getBooksById($matches[0]);
                     Common::response($result);
                 }
                 if (preg_match("[^/api/books/count(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $result = $this->modal->getCountBooks();
+                    $result = $this->model->getCountBooks();
                     Common::response($result);
                 }
                 break;
 
             case "POST":
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $array = $this->modal->checkInputData($this->user, 'POST');
+                    $array = $this->model->checkInputData($this->user, 'POST');
                     if (!isset($array[0]) or !is_array($array[0])) {
                         $array = [$array];
                     }
-                    $this->modal->addBooks($array);
+                    $result = $this->model->addBooks($array);
+                    Common::response($result);
                 }
                 break;
 
             case "PUT":
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $array = $this->modal->checkInputData($this->user, 'PUT');
+                    $array = $this->model->checkInputData($this->user, 'PUT');
                     if (!isset($array[0]) or !is_array($array[0])) {
                         $array = [$array];
                     }
-                    $this->modal->updateBooksWithId($array);
+                    $result = $this->model->updateBooksWithId($array);
+                    Common::response($result);
                 }
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $array = $this->modal->checkInputData($this->user, 'PUT');
+                    $array = $this->model->checkInputData($this->user, 'PUT');
                     if (@is_array($array[0])) {
                         Common::response(['message' => 'Incorrect input data', 'data' => $array, 'status' => 200]);
                     }
-                    $this->modal->updateBookByUriId($array);
+                    $result = $this->model->updateBookByUriId($array);
+                    Common::response($result);
                 }
                 break;
 
@@ -69,7 +72,7 @@ class Route
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
                     preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
                     $id = implode($matches[0]);
-                    $result = $this->modal->deleteById($id);
+                    $result = $this->model->deleteById($id);
                     Common::response($result);
                 }
                 break;
