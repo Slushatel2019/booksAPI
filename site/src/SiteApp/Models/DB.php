@@ -27,7 +27,7 @@ class DB
         $stmt = $this->link->prepare($query);
         if ($params) {
             foreach ($params as $param) {
-                $stmt->bindValue($param['key'], $param['value'], $param['type']);
+               $stmt->bindValue($param['key'], $param['value'], $param['type']);
             }
         }
         $stmt->execute();

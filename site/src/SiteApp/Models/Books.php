@@ -13,10 +13,10 @@ class Books
         $this->log = $loger;
         $this->db = DB::getInstance();
     }
-    public function checkInputData($user, $method)
+    public function checkInputData($method)
     {
         $postdata = file_get_contents("php://input");
-        $this->log->info('username= ' . $user, array('Method' => $method, 'inputData' => $postdata));
+        $this->log->info('Method - ' . $method . ' inputData - ' . $postdata);
         $array = json_decode($postdata, true);
         return (is_null($array) or !is_array($array)) ? Common::response([
             'message' => 'Incorrect input data',

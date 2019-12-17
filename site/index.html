@@ -14,14 +14,18 @@
             <ul class="navbar-nav">
                 <button class="btn btn-success m-1" type="submit" id="showAll">Show all books</button>
                 <button class="btn btn-primary m-1" data-toggle="modal" data-target="#myModal" type="button">Show a
-                    specific
-                    book</button>
+                    specific book</button>
                 <button class="btn btn-success m-1" data-toggle="modal" data-target="#myModalCount" type="submit"
                     id="count">count all books</button>
                 <button class="btn btn-primary m-1" data-toggle="modal" data-target="#myModalAdd" type="submit">add
                     books</button>
             </ul>
         </div>
+        <output id="userLogin"></output>
+        <button class="btn btn-success m-1" data-toggle="modal" data-target="#sign" type="button"
+            id="navButtonSign">Sign
+            in</button>
+        <button class="btn btn-success m-1" type="button" id="navButtonLogOut" style="display: none">Log out</button>
     </nav>
     <div id="result"></div>
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModallabel" aria-hidden="true">
@@ -102,6 +106,43 @@
                         <button class="btn btn-primary m-1" data-dismiss="modal">Ok</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="sign" tabindex="-1" role="dialog" aria-labelledby="myModallabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myModallabel">Sign in</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <form>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="login">login</label>
+                                        <input type="text" class="form-control" id="login" placeholder="login">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="login">password</label>
+                                        <input type="password" class="form-control" id="password"
+                                            placeholder="password">
+                                        <small id="password" class="form-text text-muted">minimum 8 charactors</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="signIn">Sign in</button>
+                        </form>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>

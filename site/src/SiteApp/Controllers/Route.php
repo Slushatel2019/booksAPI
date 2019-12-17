@@ -8,12 +8,11 @@ use SiteApp\Models\Common;
 
 class Route
 {
-    //public $log;
+    public $log;
 
-    public function __construct($loger, $user)
+    public function __construct($loger)
     {
         $this->log = $loger;
-        $this->user = $user;
         $this->model = new Books($this->log);
     }
 
@@ -21,7 +20,7 @@ class Route
     {
         switch ($_SERVER['REQUEST_METHOD']) {
             case "GET":
-                $this->log->info('username= ' . $this->user, array('Method' => 'GET', 'inputUri' => $_SERVER['REQUEST_URI']));
+                $this->log->info('Method - GET '.'inputUri - '.$_SERVER['REQUEST_URI']);
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
                     $result = $this->model->getAllBooks();
                     Common::response($result);
@@ -39,7 +38,7 @@ class Route
 
             case "POST":
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $array = $this->model->checkInputData($this->user, 'POST');
+                    $array = $this->model->checkInputData('POST');
                     if (!isset($array[0]) or !is_array($array[0])) {
                         $array = [$array];
                     }
@@ -50,7 +49,7 @@ class Route
 
             case "PUT":
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $array = $this->model->checkInputData($this->user, 'PUT');
+                    $array = $this->model->checkInputData('PUT');
                     if (!isset($array[0]) or !is_array($array[0])) {
                         $array = [$array];
                     }
@@ -58,7 +57,7 @@ class Route
                     Common::response($result);
                 }
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
-                    $array = $this->model->checkInputData($this->user, 'PUT');
+                    $array = $this->model->checkInputData('PUT');
                     if (@is_array($array[0])) {
                         Common::response(['message' => 'Incorrect input data', 'data' => $array, 'status' => 200]);
                     }
@@ -68,7 +67,7 @@ class Route
                 break;
 
             case "DELETE":
-                $this->log->info('username= ' . $this->user, array('Method' => 'DELETE', 'inputUri' => $_SERVER['REQUEST_URI']));
+                $this->log->info('Method - DELETE  inputUri - '.$_SERVER['REQUEST_URI']);
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
                     preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
                     $id = implode($matches[0]);

@@ -11,15 +11,13 @@ use Monolog\Handler\StreamHandler;
 date_default_timezone_set('Europe/Kiev');
 $log = new Logger('main_site_app');
 $log->pushHandler(new StreamHandler('logs/main.log', Logger::INFO));
-$signIn = new Auth($log);
-if ($signIn->checkUserLoginPassword()) {
-  $user = $_SERVER['PHP_AUTH_USER'];
-  $log->info('username = "' . $user . '"  auth - ok');
-  try {
-    $app = new Route($log, $user);
+$sign = new Auth($log);
+if ($sign->signIn()) {
+   try {
+    $app = new Route($log);
     $app->run();
   } catch (\Exception $e) {
     $log->error('Global error: ' . $e->getMessage());
   }
 }
-Common::response(['data' => 'error', 'message' => 'incorrect login or password', 'status' => 403]);
+Common::response(['data' => 'error', 'message' => 'incorrect login or password or cookies is disabled', 'status' => 403]);
