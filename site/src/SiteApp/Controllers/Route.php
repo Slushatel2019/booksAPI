@@ -20,7 +20,7 @@ class Route
     {
         switch ($_SERVER['REQUEST_METHOD']) {
             case "GET":
-                $this->log->info('Method - GET '.'inputUri - '.$_SERVER['REQUEST_URI']);
+                $this->log->info('Method - GET ' . 'inputUri - ' . $_SERVER['REQUEST_URI']);
                 if (preg_match("[^/api/books(|/)$]", $_SERVER['REQUEST_URI'])) {
                     $result = $this->model->getAllBooks();
                     Common::response($result);
@@ -67,7 +67,7 @@ class Route
                 break;
 
             case "DELETE":
-                $this->log->info('Method - DELETE  inputUri - '.$_SERVER['REQUEST_URI']);
+                $this->log->info('Method - DELETE  inputUri - ' . $_SERVER['REQUEST_URI']);
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
                     preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
                     $id = implode($matches[0]);

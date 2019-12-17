@@ -18,7 +18,8 @@ class Auth
     {
         return $this->checkCookieAndToken() ? true : $this->checkInputDataAndSetCookie();
     }
-    private function checkInputDataAndSetCookie() {
+    private function checkInputDataAndSetCookie()
+    {
         $postdata = file_get_contents("php://input");
         if ($postdata != null) {
             $user = json_decode($postdata, true);
@@ -38,7 +39,6 @@ class Auth
     private function checkCookieAndToken()
     {
         return isset($_COOKIE['token']) ? $this->checkToken($_COOKIE['token']) : false;
-
     }
     private function checkToken($token)
     {
