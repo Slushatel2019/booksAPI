@@ -13,7 +13,7 @@ $log = new Logger('main_site_app');
 $log->pushHandler(new StreamHandler('logs/main.log', Logger::INFO));
 $sign = new Auth($log);
 if ($sign->signIn()) {
-   try {
+  try {
     $app = new Route($log);
     $app->run();
   } catch (\Exception $e) {
