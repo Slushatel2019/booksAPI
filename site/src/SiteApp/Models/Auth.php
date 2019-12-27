@@ -4,33 +4,48 @@ namespace SiteApp\Models;
 
 use SiteApp\Models\DB;
 use SiteApp\Models\Common;
+use SiteApp\Models\Users;
 
 class Auth
 {
-
     public function __construct($loger)
     {
         $this->log = $loger;
         $this->db = DB::getInstance();
+        $this->user = Users::getInstance();
     }
-
     public function signIn()
     {
-        return $this->checkCookieAndToken() ? true : $this->checkInputDataAndSetCookie();
+        return $this->checkCookieAndToken() ? true : $this->secondCheckInputData();
     }
-    private function checkInputDataAndSetCookie()
+    public function secondCheckInputData()
     {
-        $postdata = file_get_contents("php://input");
-        if ($postdata != null) {
-            $user = json_decode($postdata, true);
-            if (isset($user['login']) and isset($user['password'])) {
-                $id = $this->checkUserLoginPasswordAndGetId($user);
-                if ($id) {
-                    $token = $this->createSaveAndGetToken($id);
-                    if ($token) {
-                        setcookie('token', $token, time() + 10);
-                        Common::response(['data' => '', 'message' => 'ok', 'status' => 200]);
-                    }
+        $inputData = Users::getInstance()->firstCheckInputData();
+        if ($inputData) {
+            $patternSignIn = ['login' => '', 'password' => ''];
+            if (count(array_diff_key($inputData, $patternSignIn)) == 0) {
+                return $this->userAuth($inputData);
+            }
+            $patternSignUp = ['login' => '', 'password' => '', 'email' => '', 'userType' => ''];
+            if (
+                count(array_diff_key($inputData, $patternSignUp)) == 0
+                and $inputData['userType'] === 'user'
+            ) {
+                return (Common::checkUserForm($inputData)) ? $this->user->addNewUser($inputData) : false;
+            }
+        } else {
+            return false;
+        }
+    }
+    private function userAuth($user)
+    {
+        if (Common::checkUserForm($user)) {
+            $checked = $this->checkUserLoginPasswordGetIdUserType($user);
+            if ($checked) {
+                $token = $this->createSaveAndGetToken($checked['id']);
+                if ($token) {
+                    setcookie('token', $token, time() + 5);
+                    Common::response(['data' => $checked['userType'], 'message' => 'ok', 'status' => 200]);
                 }
             }
         }
@@ -47,17 +62,16 @@ class Auth
         $params = [['key' => ':token', 'value' => $token, 'type' => \PDO::PARAM_STR_CHAR]];
         return ($this->db->executeSelect($query, 'rowCount', $params) === 1) ? true : false;
     }
-
-    private function checkUserLoginPasswordAndGetId($user)
+    private function checkUserLoginPasswordGetIdUserType($user)
     {
-        $query = "SELECT id FROM users WHERE 
+        $query = "SELECT id, userType FROM users WHERE 
         BINARY login = :login AND BINARY password = :password";
         $params = [
             ['key' => ':login', 'value' => $user['login'], 'type' => \PDO::PARAM_STR_CHAR],
             ['key' => ':password', 'value' => $user['password'], 'type' => \PDO::PARAM_STR_CHAR]
         ];
-        $id = $this->db->executeSelect($query, 'fetchColumn', $params);
-        return ($id != null) ? $id : false;
+        $result = $this->db->executeSelect($query, 'fetch', $params);
+        return ($result != null) ? $result : false;
     }
     private function createSaveAndGetToken($id)
     {
@@ -67,35 +81,14 @@ class Auth
             ['key' => ':token', 'value' => $token, 'type' => \PDO::PARAM_STR_CHAR],
             ['key' => ':id', 'value' => $id, 'type' => \PDO::PARAM_INT]
         ];
-        return ($this->db->executeUpdate($query, $params)['rowCount'] === 1) ? $token : false;
-    }
-
-    /*
-    public function getUserLoginPassword($force = false)
-    {
-        if (
-            !isset($_SERVER['PHP_AUTH_USER']) && !isset($_SERVER['PHP_AUTH_PW'])
-            or $_SERVER['PHP_AUTH_USER'] == '' or $_SERVER['PHP_AUTH_PW'] == '' or $force
-        ) {
-            header('WWW-Authenticate: Basic realm');
-            return false;
+        $result = $this->db->executeUpdate($query, $params);
+        if (isset($result['rowCount']) and $result['rowCount'] == 1) {
+            return $token;
+        } else {
+            if (isset($result['dbError'])) {
+                Common::response(['data' => '', 'message' => $result['dbError'], 'status' => 200]);
+            }
         }
-        return ['login' => $_SERVER['PHP_AUTH_USER'], 'password' => $_SERVER['PHP_AUTH_PW']];
+        return false;
     }
-    public function checkUserLoginPassword1()
-    {
-        $user = $this->getUserLoginPassword();
-        $query = "SELECT id FROM users WHERE 
-           BINARY login = :login AND BINARY password = :password";
-        $params = [
-            ['key' => ':login', 'value' => $user['login'], 'type' => \PDO::PARAM_STR_CHAR],
-            ['key' => ':password', 'value' => $user['password'], 'type' => \PDO::PARAM_STR_CHAR]
-        ];
-        if ($this->db->executeSelect($query, 'rowCount', $params) === 0) {
-            $force = true;
-            $this->getUserLoginPassword($force);
-        }
-        $result = $this->db->executeSelect($query, 'rowCount', $params);
-        return ($result === 1) ? true : false;
-    }*/
 }

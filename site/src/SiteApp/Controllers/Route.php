@@ -4,7 +4,7 @@ namespace SiteApp\Controllers;
 
 use SiteApp\Models\Books;
 use SiteApp\Models\Common;
-
+use SiteApp\Models\Users;
 
 class Route
 {
@@ -14,6 +14,7 @@ class Route
     {
         $this->log = $loger;
         $this->model = new Books($this->log);
+        $this->user = Users::getInstance();
     }
 
     public function run()
@@ -34,6 +35,10 @@ class Route
                     $result = $this->model->getCountBooks();
                     Common::response($result);
                 }
+                if (preg_match("[^/api/users(|/)$]", $_SERVER['REQUEST_URI'])) {
+                    $result = $this->user->getAllUsers();
+                    Common::response($result);
+                }
                 break;
 
             case "POST":
@@ -44,6 +49,15 @@ class Route
                     }
                     $result = $this->model->addBooks($array);
                     Common::response($result);
+                }
+                if (preg_match("[^/api/users(|/)$]", $_SERVER['REQUEST_URI'])) {
+                    $inputData = Users::getInstance()->firstCheckInputData();
+                    if ($inputData) {
+                        $pattern = ['login' => '', 'password' => '', 'email' => '', 'userType' => ''];
+                        if (count(array_diff_key($inputData, $pattern)) == 0) {
+                            return (Common::checkUserForm($inputData)) ? Users::getInstance()->addNewUser($inputData) : false;
+                        }
+                    }
                 }
                 break;
 
@@ -71,7 +85,16 @@ class Route
                 if (preg_match("[^/api/books/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])) {
                     preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
                     $id = implode($matches[0]);
-                    $result = $this->model->deleteById($id);
+                    $result = $this->model->deleteBookById($id);
+                    Common::response($result);
+                }
+                if (
+                    preg_match("[^/api/users/([0-9]{1,})(|/)$]", $_SERVER['REQUEST_URI'])
+                    and $this->user->getUserTypeByToken($_COOKIE['token']) == 'admin'
+                ) {
+                    preg_match_all('/[0-9]/', $_SERVER['REQUEST_URI'], $matches);
+                    $id = implode($matches[0]);
+                    $result = $this->user->deleteUserById($id);
                     Common::response($result);
                 }
                 break;

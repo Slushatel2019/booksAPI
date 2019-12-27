@@ -10,11 +10,9 @@ class DB
     {
         $this->link = new \PDO('mysql: host=localhost;dbname=library_bd', "root", "root");
     }
-
     private function __clone()
     {
     }
-
     public static function getInstance()
     {
         if (self::$instance === null) {
@@ -22,7 +20,6 @@ class DB
         }
         return self::$instance;
     }
-
     private function execute($query, $params)
     {
         $stmt = $this->link->prepare($query);
@@ -39,6 +36,7 @@ class DB
         $stmt = $this->execute($query, $params);
         $result['rowCount'] = $stmt->rowCount();
         $result['lastInsertId'] = $this->link->lastInsertId();
+        $result['dbError'] = $stmt->errorInfo();
         return $result;
     }
     public function executeUpdate($query, $params)
