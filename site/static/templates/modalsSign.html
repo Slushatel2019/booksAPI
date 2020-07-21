@@ -1,0 +1,72 @@
+<div class="modal fade" id="modalSignIn" tabindex="-1" role="dialog" aria-labelledby="myModallabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModallabel">Sign in</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="login">login</label>
+                                    <input type="text" class="form-control" id="signInLogin" placeholder="login">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="login">password</label>
+                                    <input type="password" class="form-control" id="signInPassword"
+                                        placeholder="password">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="signInModalButton">Sign in</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSignUp" tabindex="-1" role="dialog" aria-labelledby="myModallabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModallabel">Sign up</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form>
+                        <div class="form-group">
+                            <label for="login">login</label>
+                            <input type="text" class="form-control" id="signUpLogin" placeholder="login">
+                            <small id="password" class="form-text text-muted">Only A-Z a-z 0-9 _</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="signUpEmail" placeholder="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">password</label>
+                            <input type="password" class="form-control" id="signUpPassword" placeholder="password">
+                            <small id="password" class="form-text text-muted">Only A-Z a-z 0-9 . _ -</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Confirm password</label>
+                            <input type="password" class="form-control" id="signUpConfirmPassword"
+                                placeholder="password">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="signUpModalButton">Sign up</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

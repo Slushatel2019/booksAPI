@@ -6,7 +6,7 @@ use SiteApp\Models\DB;
 
 class Books
 {
-    //public $log;
+    public $log;
 
     public function __construct($loger)
     {
@@ -102,8 +102,7 @@ class Books
         $result = $this->db->executeUpdate($query, $params);
         return ['data' => $book, 'message' => ['changed book' => $result['rowCount']], 'status' => 200];
     }
-
-    function deleteById($id)
+    function deleteBookById($id)
     {
         $query = "DELETE FROM `book` WHERE id=:id";
         $params = [['key' => 'id', 'value' => $id, 'type' => \PDO::PARAM_INT]];
